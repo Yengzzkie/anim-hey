@@ -140,7 +140,7 @@ const VideoPlayer = () => {
               onClick={() => handleTitleSelect(data, data.title.romaji)}
             >
               <span>{data.title.romaji}</span>
-              <img src={data.image} width="150px" alt={data.title.romaji} />
+              <img src={data.image} className="results-image" alt={data.title.romaji} />
             </li>
           ))}
         </ul>
