@@ -98,7 +98,7 @@ const VideoPlayer = () => {
         <input type="text" id="title" value={searchInput} onChange={handleTitleSearch} />
         <button type="submit">Search</button>
       </form>
-      <ul>
+      <ul className='results'>
         {searchResults.map((data) => (
           <li key={data.id} onClick={() => handleTitleSelect(data, data.title.romaji)}>
             <span>{data.title.romaji}</span>
