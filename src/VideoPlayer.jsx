@@ -9,7 +9,7 @@ const VideoPlayer = () => {
   const [searchInput, setSearchInput] = useState('');
   const [episodes, setEpisodes] = useState([]);
   const [currentEpisode, setCurrentEpisode] = useState('1')
-  const baseURL = 'https://animhey-h1h6ssnci-yengzzkies-projects.vercel.app/meta/anilist/watch/'
+  const baseURL = 'https://animhey-sccz.vercel.app/meta/anilist/watch/'
 
   useEffect(() => {
     const fetchVideoUrl = async () => {
@@ -50,7 +50,7 @@ const VideoPlayer = () => {
   }, [videoUrl]);
 
   const fetchSearchResult = async (title) => {
-    const searchURL = `https://animhey-h1h6ssnci-yengzzkies-projects.vercel.app/meta/anilist/${title}?page=1`;
+    const searchURL = `https://animhey-sccz.vercel.app/meta/anilist/${title}?page=1`;
     try {
       const res = await fetch(searchURL);
       const resData = await res.json();
