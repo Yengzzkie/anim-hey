@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import Hls from "hls.js";
+import "video-react/dist/video-react.css";
+import { Player, ControlBar, PlayToggle, ReplayControl, ForwardControl, VolumeMenuButton, BigPlayButton } from "video-react";
 
 const VideoPlayer = () => {
-  const videoRef = useRef(null);
+  const playerRef = useRef(null);
   const [videoUrl, setVideoUrl] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [selectedTitle, setSelectedTitle] = useState("");
@@ -14,8 +16,7 @@ const VideoPlayer = () => {
 
   useEffect(() => {
     const fetchVideoUrl = async () => {
-
-      setLoading(true); // Start loading
+      setLoading(true);
       const url = `${baseURL}${currentEpisode}`;
 
       try {
@@ -25,12 +26,14 @@ const VideoPlayer = () => {
       } catch (err) {
         console.error("Error fetching video URL:", err);
       } finally {
-        setLoading(false); // End loading
-        window.scrollTo({
-          top: document.body.scrollHeight,
-          left: 0,
-          behavior: "smooth",
-        });
+        setLoading(false);
+        setTimeout(() => {
+          window.scrollTo({
+            top: document.body.scrollHeight,
+            left: 0,
+            behavior: "smooth",
+          });
+        }, 2000);
       }
     };
 
@@ -40,23 +43,27 @@ const VideoPlayer = () => {
   }, [selectedTitle, currentEpisode]);
 
   useEffect(() => {
-    if (videoUrl && Hls.isSupported()) {
-      const hls = new Hls();
-      hls.loadSource(videoUrl);
-      hls.attachMedia(videoRef.current);
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        videoRef.current.play();
-      });
-    } else if (videoRef.current.canPlayType("application/vnd.apple.mpegurl")) {
-      videoRef.current.src = videoUrl;
-      videoRef.current.addEventListener("canplay", () => {
-        videoRef.current.play();
-      });
+    if (videoUrl && playerRef.current) {
+      const videoElement = playerRef.current.video.video;
+
+      if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(videoUrl);
+        hls.attachMedia(videoElement);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          // Autoplay is disabled, so do not call play here
+        });
+      } else if (videoElement.canPlayType("application/vnd.apple.mpegurl")) {
+        videoElement.src = videoUrl;
+        videoElement.addEventListener("canplay", () => {
+          // Autoplay is disabled, so do not call play here
+        });
+      }
     }
   }, [videoUrl]);
 
   const fetchSearchResult = async (title) => {
-    setLoading(true); // Start loading
+    setLoading(true);
     const searchURL = `https://animhey-sccz.vercel.app/meta/anilist/${title}?page=1`;
     try {
       const res = await fetch(searchURL);
@@ -65,7 +72,7 @@ const VideoPlayer = () => {
     } catch (err) {
       console.error("Error fetching search result:", err);
     } finally {
-      setLoading(false); // End loading
+      setLoading(false);
       window.scrollTo({
         top: document.body.scrollHeight,
         left: 0,
@@ -94,7 +101,7 @@ const VideoPlayer = () => {
   }
 
   async function fetchID(id) {
-    setLoading(true); // Start loading
+    setLoading(true);
     try {
       const ID = await fetch(
         `https://animhey-sccz.vercel.app/meta/anilist/info/${id}`
@@ -106,7 +113,7 @@ const VideoPlayer = () => {
     } catch (err) {
       console.error("Error fetching ID:", err);
     } finally {
-      setLoading(false); // End loading
+      setLoading(false);
       window.scrollTo({
         top: document.body.scrollHeight,
         left: 0,
@@ -119,7 +126,7 @@ const VideoPlayer = () => {
     <div>
       <h1>Anim-Hey!</h1>
       <p>by: Yengzzkie DzignTech</p>
-      <h2>{selectedTitle}</h2>
+      
       <form onSubmit={handleSearchSubmit}>
         <label htmlFor="title">Title </label>
         <input
@@ -140,11 +147,16 @@ const VideoPlayer = () => {
               onClick={() => handleTitleSelect(data, data.title.romaji)}
             >
               <span>{data.title.romaji}</span>
-              <img src={data.image} className="results-image" alt={data.title.romaji} />
+              <img
+                src={data.image}
+                className="results-image"
+                alt={data.title.romaji}
+              />
             </li>
           ))}
         </ul>
       )}
+      <h2>{selectedTitle}</h2>
       <h3>Episodes:</h3>
       {loading ? (
         <p>Loading... Please wait</p>
@@ -158,9 +170,19 @@ const VideoPlayer = () => {
               </option>
             ))}
           </select>
-          <video ref={videoRef} controls style={{ width: "100%" }}>
+          <Player
+            ref={playerRef}
+            fluid
+          >
             <source src={videoUrl} />
-          </video>
+            <BigPlayButton position="center" />
+            <ControlBar>
+              <PlayToggle />
+              <ReplayControl seconds={5} />
+              <ForwardControl seconds={5} />
+              <VolumeMenuButton vertical />
+            </ControlBar>
+          </Player>
         </>
       )}
     </div>
